@@ -28,12 +28,11 @@ export function EventEditForm({ event, onSuccess }: EventEditFormProps) {
   const [uploadMode, setUploadMode] = useState<"upload" | "url">("upload")
   const [imageUrlInput, setImageUrlInput] = useState<string>("")
 
-  // Convert ISO date to datetime-local format
-  const formatDateForInput = (isoDate: string) => {
-    const date = new Date(isoDate)
-    const offset = date.getTimezoneOffset()
-    const localDate = new Date(date.getTime() - offset * 60 * 1000)
-    return localDate.toISOString().slice(0, 16)
+  const formatDateForInput = (dateString: string) => {
+    if (!dateString) return ""
+    // Veritabanından "2026-01-31 20:00" formatında gelir
+    // Input için "2026-01-31T20:00" formatına çevir
+    return dateString.replace(" ", "T").slice(0, 16)
   }
 
   const [formData, setFormData] = useState<UpdateEventInput>({
@@ -127,9 +126,18 @@ export function EventEditForm({ event, onSuccess }: EventEditFormProps) {
     setError(null)
 
     try {
-      const updateData = {
+      let adjustedDate = formData.date
+      if (formData.date) {
+        const offsetMinutes = new Date().getTimezoneOffset()
+        const localDate = new Date(formData.date)
+        localDate.setMinutes(localDate.getMinutes() - offsetMinutes)
+        adjustedDate = localDate.toISOString().slice(0, 16)
+      }
+
+      const updateData: UpdateEventInput = {
         ...formData,
-        cover_image_url: photoUrl,
+        date: adjustedDate ? adjustedDate + ":00Z" : null,
+        cover_image_url: photoUrl || null,
       }
 
       console.log("[v0] Updating event with data:", updateData)

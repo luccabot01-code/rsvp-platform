@@ -115,18 +115,19 @@ export function EventForm() {
     setShowPreview(true)
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async () => {
     setIsLoading(true)
     setError(null)
 
     try {
       const slug = generateSlug(formData.title)
 
+      const dateForDatabase = formData.date ? formData.date.replace("T", " ") : null
+
       const insertData = {
         event_type: formData.event_type,
         title: formData.title,
-        date: formData.date ? new Date(formData.date).toISOString() : null,
+        date: dateForDatabase,
         location: formData.location,
         location_url: formData.location_url || null,
         dress_code: formData.dress_code || null,
@@ -240,7 +241,7 @@ export function EventForm() {
       slug: "preview",
       event_type: formData.event_type,
       title: formData.title,
-      date: formData.date ? new Date(formData.date).toISOString() : new Date().toISOString(),
+      date: formData.date ? formData.date.replace("T", " ") : new Date().toISOString(), // Convert "YYYY-MM-DDTHH:MM" to "YYYY-MM-DD HH:MM"
       location: formData.location,
       location_url: formData.location_url,
       dress_code: formData.dress_code,
@@ -322,7 +323,7 @@ export function EventForm() {
                       <div>
                         <p className="font-semibold">Date & Time</p>
                         <p className="text-muted-foreground">
-                          {formData.date ? formatDate(new Date(formData.date).toISOString()) : "Not specified"}
+                          {formData.date ? formatDate(formData.date.replace("T", " ")) : "Not specified"}
                         </p>
                       </div>
                     </div>
@@ -403,7 +404,13 @@ export function EventForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault()
+        handleSubmit()
+      }}
+      className="space-y-6"
+    >
       <motion.div variants={formCardVariants} initial="hidden" animate="visible">
         <Card className="glass-card shadow-soft hover:shadow-soft-lg transition-all duration-300">
           <CardHeader>

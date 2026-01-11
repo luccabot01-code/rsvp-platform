@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { CheckCircle2 } from "lucide-react"
 import type { Event, CreateRSVPInput } from "@/lib/types"
 import { motion } from "framer-motion"
+import { Checkbox } from "@/components/ui/checkbox"
 
 interface RSVPFormProps {
   event: Event
@@ -232,6 +233,44 @@ export function RSVPForm({ event, isPreview = false, onSuccess }: RSVPFormProps)
               className="bg-white/30 dark:bg-white/20"
             />
             <p className="text-sm text-muted-foreground">Include yourself and any additional guests</p>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2 p-3 rounded-xl backdrop-blur-md bg-white/10 dark:bg-white/5 border border-white/20 hover:bg-white/20 dark:hover:bg-white/10 transition-colors">
+              <Checkbox
+                id="has_plusone"
+                checked={formData.has_plusone}
+                onCheckedChange={(checked) =>
+                  setFormData({
+                    ...formData,
+                    has_plusone: checked as boolean,
+                    plusone_name: checked ? formData.plusone_name : "",
+                  })
+                }
+              />
+              <Label htmlFor="has_plusone" className="font-normal cursor-pointer">
+                I'm bringing a +1
+              </Label>
+            </div>
+
+            {formData.has_plusone && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-2"
+              >
+                <Label htmlFor="plusone_name">+1 Guest Name</Label>
+                <Input
+                  id="plusone_name"
+                  value={formData.plusone_name}
+                  onChange={(e) => setFormData({ ...formData, plusone_name: e.target.value })}
+                  placeholder="Guest's full name"
+                  className="bg-white/30 dark:bg-white/20"
+                />
+              </motion.div>
+            )}
           </div>
 
           <div className="space-y-2">

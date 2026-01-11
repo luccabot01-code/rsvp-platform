@@ -7,14 +7,16 @@ CREATE TABLE IF NOT EXISTS public.events (
   -- Event details
   event_type TEXT NOT NULL CHECK (event_type IN ('wedding', 'engagement', 'birthday', 'baby_shower', 'bridal_shower', 'corporate', 'anniversary', 'graduation', 'custom')),
   title TEXT NOT NULL,
-  date TIMESTAMPTZ NOT NULL,
+  -- date kolonunu TIMESTAMPTZ yerine TEXT yaptık - saat 20:00 girildiğinde 20:00 olarak saklanacak
+  date TEXT NOT NULL,
   location TEXT NOT NULL,
   location_url TEXT,
   dress_code TEXT,
   program_notes TEXT,
   
   -- RSVP settings
-  rsvp_deadline TIMESTAMPTZ,
+  -- rsvp_deadline'ı da TEXT yaptık
+  rsvp_deadline TEXT,
   allow_plusone BOOLEAN DEFAULT true,
   require_meal_choice BOOLEAN DEFAULT false,
   meal_options JSONB DEFAULT '[]'::jsonb,

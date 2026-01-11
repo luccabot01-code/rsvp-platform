@@ -5,7 +5,17 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { LogOut, Calendar, ImageIcon } from "lucide-react"
+import { LogOut, Calendar, ImageIcon, Trash2 } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface Event {
   id: string
@@ -21,6 +31,9 @@ export function HostDashboardClient({ hostEmail }: { hostEmail: string }) {
   const router = useRouter()
   const [events, setEvents] = useState<Event[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [eventToDelete, setEventToDelete] = useState<Event | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     loadEvents()
@@ -43,6 +56,32 @@ export function HostDashboardClient({ hostEmail }: { hostEmail: string }) {
     await fetch("/api/host-logout", { method: "POST" })
     router.push("/")
     router.refresh()
+  }
+
+  const handleDeleteEvent = async () => {
+    if (!eventToDelete) return
+
+    setIsDeleting(true)
+    try {
+      const response = await fetch(`/api/events/${eventToDelete.id}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to delete event")
+      }
+
+      // Remove event from local state
+      setEvents(events.filter((e) => e.id !== eventToDelete.id))
+      setDeleteDialogOpen(false)
+      setEventToDelete(null)
+    } catch (error) {
+      console.error("[v0] Error deleting event:", error)
+      alert(error instanceof Error ? error.message : "Failed to delete event. Please try again.")
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   const formatEventType = (type: string) => {
@@ -92,26 +131,42 @@ export function HostDashboardClient({ hostEmail }: { hostEmail: string }) {
                       )}
                     </div>
 
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 mr-4">
                       <p className="font-medium truncate">{event.title}</p>
-                      <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
+                      <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground flex-wrap">
+                        <span className="flex items-center gap-1 whitespace-nowrap">
                           <Calendar className="h-3.5 w-3.5" />
                           {formatEventType(event.event_type)}
                         </span>
                         <span>•</span>
-                        <span>{new Date(event.date).toLocaleDateString()}</span>
+                        <span className="whitespace-nowrap">{new Date(event.date).toLocaleDateString()}</span>
                       </div>
                     </div>
 
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => router.push(`/dashboard/${event.slug}`)}
-                      className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
-                    >
-                      Manage
-                    </Button>
+                    <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => router.push(`/dashboard/${event.slug}`)}
+                        className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                      >
+                        Manage
+                      </Button>
+
+                      {events.length > 1 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setEventToDelete(event)
+                            setDeleteDialogOpen(true)
+                          }}
+                          className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -119,6 +174,28 @@ export function HostDashboardClient({ hostEmail }: { hostEmail: string }) {
           </CardContent>
         </Card>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Event?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <strong>{eventToDelete?.title}</strong>? This will permanently delete the
+              event and all associated RSVPs. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteEvent}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Deleting..." : "Delete Event"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

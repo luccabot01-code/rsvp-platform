@@ -112,7 +112,9 @@ export function RSVPPageClient({ event }: RSVPPageClientProps) {
             >
               {EVENT_TYPE_LABELS[event.event_type as keyof typeof EVENT_TYPE_LABELS]}
             </motion.div>
-            <h1 className="text-5xl font-bold tracking-tight text-balance text-gradient-title">{event.title}</h1>
+            <h1 className="text-5xl font-bold tracking-tight text-balance text-gradient-title break-words overflow-wrap-anywhere max-w-full px-4">
+              {event.title}
+            </h1>
             <p className="text-xl text-muted-foreground">You're invited!</p>
           </motion.header>
 

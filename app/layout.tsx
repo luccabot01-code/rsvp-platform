@@ -5,15 +5,18 @@ import { Analytics } from "@vercel/analytics/next"
 import { ThemeProvider } from "@/components/theme-provider"
 import "./globals.css"
 
-const _geist = Geist({
+const geistSans = Geist({
   subsets: ["latin"],
   display: "swap",
   preload: true,
+  variable: "--font-geist-sans",
 })
-const _geistMono = Geist_Mono({
+
+const geistMono = Geist_Mono({
   subsets: ["latin"],
   display: "swap",
   preload: true,
+  variable: "--font-geist-mono",
 })
 
 export const metadata: Metadata = {
@@ -132,7 +135,7 @@ export default function RootLayout({
       <head>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       </head>
-      <body className={`font-sans antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           {children}
         </ThemeProvider>

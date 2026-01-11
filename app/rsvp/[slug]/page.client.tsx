@@ -40,7 +40,9 @@ async function EventDetails({ slug }: { slug: string }) {
         <div className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium">
           {EVENT_TYPE_LABELS[event.event_type as keyof typeof EVENT_TYPE_LABELS]}
         </div>
-        <h1 className="text-5xl font-bold tracking-tight text-balance">{event.title}</h1>
+        <h1 className="text-5xl font-bold tracking-tight text-balance break-words overflow-wrap-anywhere max-w-full px-4">
+          {event.title}
+        </h1>
         <p className="text-xl text-muted-foreground">You're invited!</p>
       </header>
 

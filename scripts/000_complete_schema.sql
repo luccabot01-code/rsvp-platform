@@ -19,12 +19,14 @@ CREATE TABLE events (
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
   event_type text NOT NULL,
   title text NOT NULL,
-  date timestamp with time zone NOT NULL,
+  -- date kolonunu TIMESTAMPTZ yerine TEXT yaptık - timezone kayması olmayacak
+  date text NOT NULL,
   location text NOT NULL,
   location_url text,
   dress_code text,
   program_notes text,
-  rsvp_deadline timestamp with time zone,
+  -- rsvp_deadline kolonunu da TEXT yaptık
+  rsvp_deadline text,
   allow_plusone boolean NOT NULL DEFAULT true,
   require_meal_choice boolean NOT NULL DEFAULT false,
   meal_options jsonb NOT NULL DEFAULT '[]'::jsonb,
