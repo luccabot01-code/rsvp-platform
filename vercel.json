@@ -1,6 +1,4 @@
 {
-  "buildCommand": "cd rsvp-platform && npm run build",
-  "outputDirectory": "rsvp-platform/.next",
   "framework": "nextjs",
   "regions": ["iad1"],
   "headers": [
